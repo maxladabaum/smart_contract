@@ -1,0 +1,115 @@
+pragma solidity ^0.4.21;
+
+contract Judge {
+    
+    struct Option {
+        string name;
+        uint voteCount;
+        uint betValue;
+    }
+    
+    struct Voter {
+        bool authorizedVoter;
+        bool voted;
+        uint vote;
+    }
+    
+    struct Bettor {
+        bool authorizedBettor;
+        bool paidContract;
+        bool beenPaid;
+    }
+    
+    address public owner;
+    string public eventName;
+    uint public numAuthorizedVoters;
+    uint public numAuthorizedBettors;
+    bool public votersVoted;
+    bool public bettorsPaid;
+    address[] internal voterAddressList;
+    address[] internal bettorAddressList;
+    
+    mapping(address => Voter) public voters;
+    mapping(address => Bettor) public bettors;
+    Option[] public options;
+    uint public totalVotes;
+    
+    modifier ownerOnly() {
+        require(msg.sender == owner);
+        _;
+    }
+    
+    function nameEvent(string _name) ownerOnly public {
+        eventName = _name;
+    }
+    
+    function addVoteOption(string _name, uint _val) ownerOnly public {
+        options.push(Option(_name, 0, _val));
+    }
+    
+    function structureBet(uint _voteIndex, uint _value) ownerOnly public {
+        options[_voteIndex].betValue = _value;
+    }
+    
+    function authorizeVoter(address _person) ownerOnly public {
+        voters[_person].authorizedVoter = true;
+        numAuthorizedVoters += 1;
+        voterAddressList.push(_person);
+    }
+    
+    function authorizeBettor(address _person) ownerOnly public {
+        bettors[_person].authorizedBettor = true;
+        numAuthorizedBettors += 1;
+        bettorAddressList.push(_person);
+    }
+        
+    
+    function vote(uint _voteIndex) public {
+        require(!voters[msg.sender].voted);
+        require(voters[msg.sender].authorizedVoter);
+        
+        voters[msg.sender].vote = _voteIndex;
+        voters[msg.sender].voted = true;
+        
+        options[_voteIndex].voteCount += 1;
+    }
+    
+    function placeBet(uint)
+    
+    function confirmAllVoted() internal {
+        for (uint i = 1; i < numAuthorizedVoters+1; i++) {
+            if (voters[voterAddressList[i]].voted = true) {
+                votersVoted = true;
+            }
+            else {
+                votersVoted = false;
+                break;
+            }
+        }
+    }
+
+    function confirmBettorsPaid() internal {
+        for (uint i = 1; i < numAuthorizedBettors+1; i++) {
+            if (bettors[bettorAddressList[i]].paidContract = true) {
+                bettorsPaid = true;
+            }
+            else {
+                bettorsPaid = false;
+                break;
+            }
+        }
+    }
+
+    function payOut() public {
+        confirmAllVoted();
+        confirmBettorsPaid();
+        require(votersVoted);
+        require(bettorsPaid);
+        
+        //pay out contract with stuff I haven't figured out yet
+    }
+   
+    function end() ownerOnly public {
+        selfdestruct(owner);
+    }
+}
